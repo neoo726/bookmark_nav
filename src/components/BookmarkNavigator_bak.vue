@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue'
-import { SearchIcon, CheckIcon, SunIcon, MoonIcon, XIcon, StarIcon, EditIcon, Trash2Icon, UploadIcon, MessageSquareIcon, ClockIcon, UserIcon, LogOutIcon, KeyIcon } from 'lucide-vue-next'
-import LoginModal from './LoginModal.vue'
+import { SearchIcon, SettingsIcon, CheckIcon, SunIcon, MoonIcon, XIcon, StarIcon, EditIcon, Trash2Icon, UploadIcon, MessageSquareIcon, ClockIcon, GlobeIcon } from 'lucide-vue-next'
 
 interface User {
   name: string;
@@ -29,7 +28,6 @@ interface BookmarkGroup {
 const isEditMode = ref(false)
 const searchTerm = ref('')
 const showUserMenu = ref(false)
-const showLanguageMenu = ref(false)
 const language = ref('zh')
 const isDarkMode = ref(false)
 const hoveredBookmark = ref<Bookmark | null>(null)
@@ -38,10 +36,12 @@ const hoverTimer = ref<number | null>(null)
 const showFeedbackModal = ref(false)
 const showVersionHistory = ref(false)
 const feedbackText = ref('')
-const isAuthenticated = ref(false)
-const showLoginModal = ref(false)
+const showLanguageMenu = ref(false)
 
-const user = ref<User | null>(null)
+const user = ref<User>({
+  name: '张三',
+  email: 'zhangsan@example.com'
+})
 
 const bookmarkGroups = ref<BookmarkGroup[]>([
   {
@@ -80,7 +80,6 @@ const toggleUserMenu = () => {
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
   document.documentElement.classList.toggle('dark', isDarkMode.value)
-  document.body.style.backgroundColor = isDarkMode.value ? '#1a202c' : '#f7fafc'
 }
 
 const startEditingGroup = (group: BookmarkGroup) => {
@@ -277,9 +276,9 @@ const parseAndAddBookmarks = (content: string) => {
   const doc = parser.parseFromString(content, 'text/html')
   const bookmarkNodes = doc.querySelectorAll('a')
   const folderNodes = doc.querySelectorAll('h3')
-
+  
   let currentGroup: BookmarkGroup | null = null
-
+  
   folderNodes.forEach((folderNode, index) => {
     const groupTitle = folderNode.textContent || `Imported Group ${index + 1}`
     currentGroup = {
@@ -310,7 +309,7 @@ const parseAndAddBookmarks = (content: string) => {
       bookmarkGroups.value.push(currentGroup)
     }
   })
-
+  
   // If no folders were found, create a single group with all bookmarks
   if (bookmarkGroups.value.length === 0) {
     const newGroup: BookmarkGroup = {
@@ -356,31 +355,6 @@ const submitFeedback = () => {
   // Show a thank you message or notification
 }
 
-const login = (userData: User) => {
-  user.value = userData
-  isAuthenticated.value = true
-  showLoginModal.value = false
-}
-
-const logout = () => {
-  user.value = null
-  isAuthenticated.value = false
-  showUserMenu.value = false
-}
-
-const resetPassword = () => {
-  // Implement password reset logic here
-  console.log('Reset password')
-}
-
-const closeDropdowns = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.user-menu') && !target.closest('.language-menu')) {
-    showUserMenu.value = false
-    showLanguageMenu.value = false
-  }
-}
-
 const t = (key: string): string => {
   const translations: Record<string, Record<string, string>> = {
     zh: {
@@ -405,10 +379,7 @@ const t = (key: string): string => {
       edit: '编辑',
       delete: '删除',
       language: '语言',
-      enterURL: '输入URL',
-      login: '登录',
-      logout: '登出',
-      resetPassword: '重置密码'
+      enterURL: '输入URL'
     },
     en: {
       bookmarkNavigator: 'Bookmark Navigator',
@@ -418,7 +389,7 @@ const t = (key: string): string => {
       addBookmark: 'Add Bookmark',
       addNewGroup: 'Add New Group',
       newBookmark: 'New Bookmark',
-      editDescription: 'Edit  description',
+      editDescription: 'Edit description',
       newGroup: 'New Group',
       pin: 'Pin',
       unpin: 'Unpin',
@@ -432,10 +403,7 @@ const t = (key: string): string => {
       edit: 'Edit',
       delete: 'Delete',
       language: 'Language',
-      enterURL: 'Enter URL',
-      login: 'Login',
-      logout: 'Logout',
-      resetPassword: 'Reset Password'
+      enterURL: 'Enter URL'
     }
   }
   return translations[language.value][key] || key
@@ -443,7 +411,7 @@ const t = (key: string): string => {
 
 const sortedGroups = computed(() => {
   return [...bookmarkGroups.value].sort((a, b) => {
-    if (a.isPinned === b.isPinned) return 0
+    if (a.isPinned === b.isPinned)   return 0
     return a.isPinned ? -1 : 1
   })
 })
@@ -475,49 +443,40 @@ const isBookmarkMatched = (bookmark: Bookmark) => {
 
 onMounted(() => {
   window.addEventListener('resize', updateHoverPosition)
-  window.addEventListener('click', closeDropdowns)
   // Check system preference for dark mode
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     isDarkMode.value = true
   }
   document.documentElement.classList.toggle('dark', isDarkMode.value)
-  document.body.style.backgroundColor = isDarkMode.value ? '#1a202c' : '#f7fafc'
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateHoverPosition)
-  window.removeEventListener('click', closeDropdowns)
 })
 </script>
 
 <template>
-  <div :class="{ 'dark': isDarkMode }" class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+  <div :class="{ 'dark': isDarkMode }" class="min-h-screen bg-gray-100 dark:bg-[#1a1b27] transition-colors duration-300">
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+    <header class="bg-white dark:bg-[#1a1b27] shadow">
+      <div class="container mx-auto px-4 py-2 flex items-center justify-between">
         <div class="flex items-center">
           <svg class="w-8 h-8 mr-2 text-gray-800 dark:text-white" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <path d="M512 22C241.38 22 22 241.38 22 512s219.38 490 490 490 490-219.38 490-490S782.62 22 512 22z m226.06 277.73L517.54 809.14c-3.18 7.28-13.72 7.08-17.21-0.41L410.4 616.57a5.966 5.966 0 0 0-2.97-2.97L215.6 523.58c-7.58-3.49-7.79-14.05-0.41-17.23l508.74-220.76c8.91-3.91 18.03 5.22 14.13 14.14z" fill="currentColor" />
           </svg>
-          <h1 class="text-xl font-bold text-gray-800 dark:text-white">{{ t('bookmarkNavigator') }}</h1>
         </div>
         <div class="flex items-center space-x-2 sm:space-x-4">
-          <div class="flex items-center space-x-2">
-            <button @click="toggleEditMode" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 relative" :title="t('editMode')">
-              <EditIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
-              <div v-if="isEditMode" class="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full"></div>
-            </button>
-            <button v-if="isEditMode" @click="importBookmarks" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('importBookmarks')">
-              <UploadIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            </button>
-          </div>
+          <button @click="toggleEditMode" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('editMode')">
+            <SettingsIcon v-if="!isEditMode" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            <CheckIcon v-else class="h-5 w-5 text-green-600 dark:text-green-400" />
+          </button>
           <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('darkMode')">
             <SunIcon v-if="isDarkMode" class="h-5 w-5 text-yellow-400" />
             <MoonIcon v-else class="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <div class="relative language-menu">
+          <div class="relative">
             <button @click="toggleLanguageMenu" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
-              {{ language === 'zh' ? '中文' : 'English' }}
+              {{ language.toUpperCase() }}
             </button>
             <div v-if="showLanguageMenu" class="absolute right-0 mt-2 w-24 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-10">
               <button @click="changeLanguage('zh')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -528,38 +487,28 @@ onUnmounted(() => {
               </button>
             </div>
           </div>
+          <button @click="importBookmarks" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('importBookmarks')">
+            <UploadIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          </button>
           <button @click="showFeedbackModal = true" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('feedback')">
             <MessageSquareIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
           <button @click="showVersionHistory = true" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('versionHistory')">
             <ClockIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <div v-if="isAuthenticated" class="relative user-menu">
+          <div class="relative">
             <div @click="toggleUserMenu" class="h-8 w-8 rounded-full cursor-pointer bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
-              <img v-if="user?.avatar" :src="user.avatar" alt="User Avatar" class="h-full w-full rounded-full">
-              <span v-else>{{ user?.name.substring(0, 2).toUpperCase() }}</span>
+              <img v-if="user.avatar" :src="user.avatar" alt="User Avatar" class="h-full w-full rounded-full">
+              <span v-else>{{ user.name.substring(0, 2).toUpperCase() }}</span>
             </div>
             <!-- User menu -->
             <div v-if="showUserMenu" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-10">
               <div class="p-4">
-                <h3 class="font-semibold dark:text-white">{{ user?.name }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ user?.email }}</p>
-              </div>
-              <div class="border-t border-gray-200 dark:border-gray-700">
-                <button @click="resetPassword" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <KeyIcon class="inline-block w-4 h-4 mr-2" />
-                  {{ t('resetPassword') }}
-                </button>
-                <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <LogOutIcon class="inline-block w-4 h-4 mr-2" />
-                  {{ t('logout') }}
-                </button>
+                <h3 class="font-semibold dark:text-white">{{ user.name }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</p>
               </div>
             </div>
           </div>
-          <button v-else @click="showLoginModal = true" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" :title="t('login')">
-            <UserIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          </button>
         </div>
       </div>
     </header>
@@ -587,7 +536,7 @@ onUnmounted(() => {
 
       <!-- Bookmark navigation area -->
       <div class="space-y-8">
-        <div v-for="group in filteredGroups" :key="group.id" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <div v-for="group in filteredGroups" :key="group.id" class="bg-white dark:bg-[#232532] p-6 rounded-lg shadow">
           <div class="flex justify-between items-center mb-4">
             <input
               v-if="isEditMode && group.isEditing"
@@ -613,7 +562,7 @@ onUnmounted(() => {
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
             <div v-for="bookmark in sortedBookmarks(group)" :key="bookmark.id"
-                 class="bg-white dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50 p-4 rounded-lg shadow-sm border dark:border-gray-700 transition-all duration-300 cursor-pointer hover:shadow-md relative"
+                 class="bg-white dark:bg-[#232532] bg-opacity-50 dark:bg-opacity-50 p-4 rounded-lg shadow-sm border dark:border-gray-600 transition-all duration-300 cursor-pointer hover:shadow-md relative"
                  :class="{ 'ring-2 ring-blue-500': isBookmarkMatched(bookmark) }"
                  @click="openBookmark(bookmark.url)"
                  @mouseenter="startHoverTimer(bookmark, $event)"
@@ -630,7 +579,7 @@ onUnmounted(() => {
                     v-model="bookmark.name"
                     @blur="finishEditingBookmark(bookmark)"
                     @keyup.enter="focusBookmarkDescription(bookmark)"
-                    class="font-semibold w-full dark:bg-gray-700 dark:text-white text-sm"
+                    class="font-semibold w-full dark:bg-gray-600 dark:text-white text-sm"
                   >
                   <h3 v-else class="font-semibold dark:text-white text-sm truncate">{{ bookmark.name }}</h3>
                   <input
@@ -720,9 +669,6 @@ onUnmounted(() => {
         </div>
       </div>
     </Teleport>
-
-    <!-- Login Modal -->
-    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @login="login" />
   </div>
 </template>
 
