@@ -619,11 +619,11 @@ watch(language, (newLang) => {
 })
 
 onMounted(() => {
-  window.addEventListener('resize', updateHoverPosition)
+  window.addEventListener('resize', updateHoverPosition as EventListener)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateHoverPosition)
+  window.removeEventListener('resize', updateHoverPosition as EventListener)
 })
 </script>
 
