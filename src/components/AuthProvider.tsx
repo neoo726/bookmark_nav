@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 
 type User = {
   id: string
@@ -18,34 +18,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    // 模拟从本地存储或 API 获取用户信息
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setIsLoading(false)
-  }, [])
 
   const login = () => {
-    const newUser = {
+    // 这里应该是实际的登录逻辑
+    setUser({
       id: '1',
       name: 'Test User',
       avatar: '/default-avatar.png'
-    }
-    setUser(newUser)
-    localStorage.setItem('user', JSON.stringify(newUser))
+    })
   }
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('user')
-  }
-
-  if (isLoading) {
-    return null // 或者返回一个加载指示器
   }
 
   return (

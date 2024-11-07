@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { useAuth } from '@/components/AuthProvider'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,56 +10,65 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { AuthModal } from '@/components/AuthModal'
+import { useState } from 'react'
 
 export default function Header() {
-  const [language, setLanguage] = useState('English')
-  const { user, login, logout } = useAuth()
+  const { language, setLanguage } = useLanguage()
+  const { user, logout } = useAuth()
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   return (
-    <header className="flex items-center justify-between p-4 border-b">
-      <div className="flex items-center space-x-2">
-        <Image src="/logo.svg" alt="Logo" width={32} height={32} />
-        <h1 className="text-xl font-bold">Bookmark Navigator</h1>
-      </div>
-      <div className="flex items-center space-x-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="focus:ring-0 focus:ring-offset-0">
-              <span className="font-bold">{language}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setLanguage('English')}>
-              English
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLanguage('中文')}>
-              中文
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {user ? (
+    <header className="bg-white shadow-md w-full">
+      <div className="mx-auto h-16 flex items-center justify-between w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center">
+          <Image src="/logo.svg" alt="Logo" width={32} height={32} />
+          <h1 className="text-xl font-bold ml-2">Bookmark Navigator</h1>
+        </div>
+        <div className="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative w-8 h-8 rounded-full">
-                <Image
-                  src={user.avatar || '/default-avatar.png'}
-                  alt="User Avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
+              <Button variant="outline">
+                <span className="font-medium">{language}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={logout}>
-                登出
+              <DropdownMenuItem onClick={() => setLanguage('English')}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('中文')}>
+                中文
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <Button onClick={login}>登录</Button>
-        )}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Image
+                    src={user.avatar || '/default-avatar.png'}
+                    alt="User Avatar"
+                    width={24}
+                    height={24}
+                    className="rounded-full mr-2"
+                  />
+                  <span>{user.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={logout}>
+                  {language === '中文' ? '登出' : 'Logout'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button onClick={() => setIsAuthModalOpen(true)}>
+              {language === '中文' ? '登录' : 'Login'}
+            </Button>
+          )}
+        </div>
       </div>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   )
 }
