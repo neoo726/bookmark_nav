@@ -1,47 +1,44 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <div class="flex flex-col h-screen">
+    <Header />
+    <div class="flex flex-1 overflow-hidden">
+      <Sidebar />
+      <main class="flex-1 p-6 bg-gray-50 overflow-auto">
+        <router-view></router-view>
+      </main>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+    <Footer />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script>
+import { provide } from 'vue'
+import { useLanguageStore } from './stores/language'
+import Header from './components/Header.vue'
+import Sidebar from './components/Sidebar.vue'
+import Footer from './components/Footer.vue'
+
+export default {
+  name: 'App',
+  components: {
+    Header,
+    Sidebar,
+    Footer
+  },
+  setup() {
+    const languageStore = useLanguageStore()
+    provide('language', languageStore)
+  }
 }
+</script>
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+<style>
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 </style>
