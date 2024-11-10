@@ -20,15 +20,14 @@
 </template>
 
 <script>
-import { ref, computed, inject } from 'vue'
-import LoginPrompt from './LoginPrompt.vue'
+import { ref, computed, inject, defineAsyncComponent } from 'vue'
 
 export default {
   name: 'CreateFirstNavigation',
   components: {
-    LoginPrompt
+    LoginPrompt: defineAsyncComponent(() => import('./LoginPrompt.vue'))
   },
-  setup() {
+  setup(props, { emit }) {
     const languageStore = inject('language')
     const authStore = inject('auth')
     const language = computed(() => languageStore.language)
@@ -64,8 +63,8 @@ export default {
     }
 
     const login = () => {
-      authStore.login()
       showLoginPrompt.value = false
+      emit('login')
     }
 
     return {

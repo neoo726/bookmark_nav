@@ -31,14 +31,14 @@
             <option value="zh">中文</option>
           </select>
           <button
-            @click="register"
+            @click="showRegisterModal = true"
             class="text-gray-400 hover:text-white hover:font-bold transition-all duration-200"
           >
             {{ language === 'en' ? 'Register' : '注册' }}
           </button>
           <button
             v-if="!user"
-            @click="login"
+            @click="showLoginModal = true"
             class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
           >
             {{ language === 'en' ? 'Login' : '登录' }}
@@ -52,18 +52,32 @@
           </div>
         </div>
       </div>
+      <LoginModal 
+        :show="showLoginModal" 
+        @close="showLoginModal = false"
+        @switch-to-register="showLoginModal = false; showRegisterModal = true"
+      />
+      <RegisterModal 
+        :show="showRegisterModal" 
+        @close="showRegisterModal = false"
+        @switch-to-login="showRegisterModal = false; showLoginModal = true"
+      />
     </header>
   </template>
   
   <script>
   import { ref, computed, inject } from 'vue'
   import { XIcon, Search } from 'lucide-vue-next'
+  import LoginModal from './LoginModal.vue'
+  import RegisterModal from './RegisterModal.vue'
   
   export default {
     name: 'Header',
     components: {
       XIcon,
-      Search
+      Search,
+      LoginModal,
+      RegisterModal
     },
     setup() {
       const languageStore = inject('language')
@@ -82,6 +96,9 @@
   
       const user = computed(() => authStore.user)
   
+      const showLoginModal = ref(false)
+      const showRegisterModal = ref(false)
+  
       const login = () => authStore.login()
       const logout = () => authStore.logout()
       const register = () => authStore.register()
@@ -94,7 +111,9 @@
         login,
         logout,
         register,
-        clearSearch
+        clearSearch,
+        showLoginModal,
+        showRegisterModal
       }
     }
   }

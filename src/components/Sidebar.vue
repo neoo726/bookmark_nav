@@ -20,7 +20,7 @@
           </li>
         </template>
         <li v-else>
-          <CreateFirstNavigation />
+          <CreateFirstNavigation @login="onLogin" />
         </li>
       </ul>
     </nav>
@@ -37,7 +37,13 @@
     components: {
       CreateFirstNavigation
     },
-    setup() {
+    props: {
+      onLogin: {
+        type: Function,
+        required: true
+      }
+    },
+    setup(props) {
       const route = useRoute()
       const languageStore = inject('language')
       const authStore = inject('auth')
@@ -61,12 +67,17 @@
         }
       }
   
+      const handleLogin = () => {
+        props.onLogin()
+      }
+  
       return {
         menuItems,
         isActive,
         language,
         translations,
-        isLoggedIn
+        isLoggedIn,
+        onLogin: props.onLogin // Updated line
       }
     }
   }
